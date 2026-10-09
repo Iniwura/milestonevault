@@ -1,0 +1,11 @@
+__pycache__/
+.pytest_cache/
+artifacts/
+.venv/
+frontend/dist/
+frontend/node_modules.stalled/
+frontend/node_modules/
+frontend/node_modules
+frontend/.env
+work/
+*.pyc
