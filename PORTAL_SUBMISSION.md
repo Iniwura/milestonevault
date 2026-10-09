@@ -44,7 +44,7 @@ The dependency consequence is explicit: M1 success → M2 unlocked; M2 rejection
 - Frontend tests: 5 passed.
 - Frontend TypeScript: passed with exit 0.
 - Frontend production build: passed with exit 0.
-- Production bundle: must contain only the current deployed contract address.
+- Production routes: /, /projects, /projects/milestonevault-live-20261009-b, /projects/milestonevault-live-20261009-b/milestones/m1-design-b, /create, and /proof returned anonymous HTTP 200.\n- Protection: password and SSO protection disabled; anonymous access verified.\n- Production bundle: current contract address appears once; no superseded contract address appears.
 
 ## Portal status
 
