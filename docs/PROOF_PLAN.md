@@ -2,7 +2,7 @@
 
 This is the exact proof sequence to run after an explicit deployment/funding confirmation. It is not a claim that a live deployment has already happened.
 
-1. Create `mv-proof-001` with client and contributor roles.
+1. Create `milestonevault-live-20261009-a` with client and contributor roles (after a collision check).
 2. Add four `0.01 GEN` milestones in order: `m1-design`; `m2-build` depending on M1; `m3-handoff` depending on M2; and independent `m4-unavailable` as the fail-closed case. Set all four repair budgets to `0` for a one-pass close proof. M4 therefore becomes terminal `UNRESOLVED` on its first unavailable-evidence adjudication; it does not require `finalize_unresolved()` in this canonical run.
 3. Fund exactly `0.04 GEN`; verify `initial_escrow` and the frozen packet fingerprint.
 4. Activate; verify M1 and M4 are `AVAILABLE`, while M2 and M3 are `LOCKED`.
@@ -22,13 +22,13 @@ The canonical run funds `0.04 GEN` of escrow. M1 is the only earned tranche, so 
 
 The canonical sequence uses one client, one contributor, and one funded project. The client signs steps 1–7, 9, 13, and 15–17; the contributor signs steps 8, 10–12, and 14. All writes are zero-value except step 6. The replay and second-close writes are deliberate expected failures.
 
-1. Client: `create_project("mv-proof-001", contributor, ...)` — zero value.
+1. Client: `create_project("milestonevault-live-20261009-a", contributor, ...)` — zero value.
 2. Client: `add_milestone(..., "m1-design", tranche=0.01 GEN, dependencies=[], repair_budget=0, ...)` — zero value.
 3. Client: `add_milestone(..., "m2-build", tranche=0.01 GEN, dependencies=["m1-design"], repair_budget=0, ...)` — zero value.
 4. Client: `add_milestone(..., "m3-handoff", tranche=0.01 GEN, dependencies=["m2-build"], repair_budget=0, ...)` — zero value.
 5. Client: `add_milestone(..., "m4-unavailable", tranche=0.01 GEN, dependencies=[], repair_budget=0, ...)` — zero value.
-6. Client: `fund_project("mv-proof-001")` — payable value exactly `0.04 GEN`.
-7. Client: `activate_project("mv-proof-001")` — zero value.
+6. Client: `fund_project("milestonevault-live-20261009-a")` — payable value exactly `0.04 GEN`.
+7. Client: `activate_project("milestonevault-live-20261009-a")` — zero value.
 8. Contributor: `submit_milestone("m1-design", valid_manifest)` — zero value.
 9. Client: `adjudicate_milestone("m1-design")` — zero value; expect `ACCEPTED`.
 10. Contributor: `settle_milestone("m1-design")` — zero value; expect exact `0.01 GEN` transfer.
@@ -37,7 +37,7 @@ The canonical sequence uses one client, one contributor, and one funded project.
 13. Client: `adjudicate_milestone("m2-build")` — zero value; expect `REJECTED`, no payout, and M3 `BLOCKED`.
 14. Contributor: `submit_milestone("m4-unavailable", unavailable_https_manifest)` — zero value; use a preflight-verified unavailable/404 HTTPS source.
 15. Client: `adjudicate_milestone("m4-unavailable")` — zero value; expect terminal `UNRESOLVED`, no payout.
-16. Client: `close_project("mv-proof-001")` — zero value; expect `COMPLETED → CLOSED` and exactly `0.03 GEN` refund.
-17. Client: replay `close_project("mv-proof-001")` — zero value; expect rejection and no second refund.
+16. Client: `close_project("milestonevault-live-20261009-a")` — zero value; expect `COMPLETED → CLOSED` and exactly `0.03 GEN` refund.
+17. Client: replay `close_project("milestonevault-live-20261009-a")` — zero value; expect rejection and no second refund.
 
 The proof record must contain observed transaction hashes, receipts, source/schema readbacks, and balance deltas. Hashes must never be prefilled or invented.
