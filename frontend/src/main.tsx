@@ -308,7 +308,7 @@ function CreatePage({ account, onWrite }: { account: string | null; onWrite: (me
   if(!/^0x[0-9a-fA-F]{40}$/.test(form.contributor.trim()))throw Error("Enter a valid contributor wallet address.");
   if(!/^[A-Za-z0-9._-]{1,64}$/.test(form.projectId))throw Error("Project ID must be 1–64 letters, numbers, dots, dashes or underscores.");
   if(!form.title.trim()||!form.scope.trim())throw Error("Project title and scope are required.");
-  if(!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$/.test(form.deadlineUtc)||!Number.isFinite(Date.parse(form.deadlineUtc))||Date.parse(form.deadlineUtc)<=Date.now())throw Error("Enter a future deadline using YYYY-MM-DDTHH:MM:SSZ.");
+  if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(form.deadlineUtc)||!Number.isFinite(Date.parse(form.deadlineUtc))||Date.parse(form.deadlineUtc)<=Date.now())throw Error("Enter a future deadline using YYYY-MM-DDTHH:MM:SSZ.");
   if(!/^[0-3]$/.test(form.repairBudget))throw Error("Repair allowance must be between 0 and 3.");
   if(!stages.length||stages.length>32)throw Error("Add between 1 and 32 work packages.");
   const seen=new Set<string>();
