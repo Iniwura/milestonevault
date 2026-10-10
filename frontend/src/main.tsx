@@ -6,6 +6,7 @@ import { CONTRACT_ADDRESS, connectWallet, currentWallet, errorMessage, explorerC
 import { accountingPresentation, canonicalProofCase, dependencyPresentation, milestoneActionFor, projectActionFor, stateLabel, stateTone } from "./product";
 import "./styles.css";
 import "./control-system.css";
+import "./atelier.css";
 
 type Milestone = Record<string, any> & { milestone_id: string; state: string; tranche: number | string; dependencies: string[]; current_submission?: Record<string, any> | null };
 type Project = Record<string, any> & { project_id: string; state: string; milestone_ids: string[]; milestones: Milestone[]; client: string; contributor: string };
@@ -62,22 +63,23 @@ function App() {
 }
 
 
+
 function Header({ account, readOnly, onConnect }: { account: string | null; readOnly?: boolean; onConnect: () => void }) {
- return <header className="site-header"><div className="header-inner">
-   <button className="brand" onClick={()=>navigate("/")} aria-label="MilestoneVault home">
-     <span className="brand-mark"><GitBranch size={23}/></span><span><strong>MILESTONE<span>VAULT</span></strong><small>PROJECT CONTROL / GENLAYER</small></span>
-   </button>
-   <nav aria-label="Main navigation">
-     <button onClick={()=>navigate("/projects")}>Projects</button>
-     <button onClick={()=>navigate("/proof")}>Live verification</button>
-     <button className="nav-create" onClick={()=>navigate("/create")}><Plus size={13}/> New project</button>
-   </nav>
-   <div className="header-meta"><a href={explorerContract()} target="_blank" rel="noreferrer"><i/> STUDIO DEV <ExternalLink size={12}/></a>
-     {readOnly?<span className="observer-badge">LIVE / READ-ONLY</span>:<button className="wallet-button" onClick={onConnect}><Wallet size={14}/>{account?short(account,5,4):"Connect wallet"}</button>}
-   </div>
+ const [menuOpen,setMenuOpen]=useState(false);
+ const go=(to:string)=>{setMenuOpen(false);navigate(to);};
+ return <header className="site-header np-header"><div className="header-inner np-header-inner">
+  <button className="brand np-brand" onClick={()=>go("/")} aria-label="MilestoneVault home"><strong>milestonevault<span className="np-brand-period">.</span></strong><span className="np-brand-sub">funded work / 61997</span></button>
+  <nav className={menuOpen?"np-open":""} aria-label="Main navigation">
+   <button onClick={()=>go("/projects")}>PROJECTS</button><button onClick={()=>go("/proof")}>LIVE PROOF</button>
+   <button onClick={()=>go("/create")}>CREATE PROJECT</button>
+   <button className="np-menu-close" onClick={()=>setMenuOpen(false)}>CLOSE ×</button>
+  </nav>
+  <div className="np-header-actions">
+   {readOnly?<span className="np-readonly">● PUBLIC VERIFICATION</span>:<button className="np-wallet" onClick={onConnect}>{account?short(account,5,4):"CONNECT WALLET"} <ArrowUpRight size={13}/></button>}
+   <button className="np-menu-trigger" aria-label={menuOpen?"Close navigation":"Open navigation"} aria-expanded={menuOpen} onClick={()=>setMenuOpen(o=>!o)}>{menuOpen?"CLOSE":"MENU"} <span>{menuOpen?"×":"+"}</span></button>
+  </div>
  </div></header>;
 }
-
 
 
 function ControlState({ state }: {state:string}) { return <span className={`control-state ${stateTone(state)}`}>{stateLabel(state)}</span>; }
@@ -102,37 +104,60 @@ function ScheduleGrid({entries,heading="WORK PACKAGES",compact=false}:{entries:S
  </div>;
 }
 
+
 function Landing() {
- return <main className="control-home">
-  <section className="control-hero"><div className="page-width control-hero-inner">
-    <div><div className="control-kicker">FUNDED PROJECT CONTROL</div>
-      <h1>Work moves.<br/><span>Funds follow.</span></h1>
-      <p>Build a dependency-aware delivery plan, fund its exact tranches, and release value only when each stage satisfies its frozen acceptance criteria.</p>
-      <div className="control-hero-actions">
-        <button className="button button-dark" onClick={()=>navigate(`/projects/${CANONICAL_PROJECT_ID}`)}>Explore live project <ArrowUpRight size={16}/></button>
-        <button className="control-ghost-button" onClick={()=>navigate("/create")}>Create a project <ArrowRight size={15}/></button>
-      </div>
-      <div className="control-hero-foot"><span>32 MAX MILESTONES</span><span>CRITERION-LEVEL AI REVIEW</span><span>EXACT GEN RELEASE</span></div>
+ const outcomes=[
+   {number:"01",label:"M1 / ACCEPTED",title:"work accepted.",sub:"0.01 GEN released exactly once",state:"PAID",tone:"paid",id:"m1-design-b"},
+   {number:"02",label:"M2 / REJECTED",title:"the line held.",sub:"material failure / no payout",state:"REJECTED",tone:"rejected",id:"m2-build-b"},
+   {number:"03",label:"M3 / DEPENDENT",title:"nothing slipped.",sub:"predecessor failed / downstream blocked",state:"BLOCKED",tone:"blocked",id:"m3-handoff-b"},
+   {number:"04",label:"M4 / UNRESOLVED",title:"no proof. no pay.",sub:"unavailable evidence / safe close",state:"UNRESOLVED",tone:"unresolved",id:"m4-unavailable-b"},
+ ];
+ return <main className="np-home">
+  <section className="np-hero">
+   <div className="np-hero-grain" aria-hidden="true"/>
+   <div className="np-hero-asterisk" aria-hidden="true">✳</div>
+   <div className="np-hero-content">
+    <div className="np-hero-overline"><span>AN INTELLIGENT CONTRACT EXPERIENCE</span><span>PROJECT SYSTEM · VOL 01</span></div>
+    <div className="np-hero-titleblock"><h1>milestone<span>vault.</span></h1><div className="np-hero-tags"><span>STAGED FUNDING</span><span>SEMANTIC REVIEW</span><span>DEPENDENCY GRAPH</span><span>GEN RELEASE</span></div></div>
+    <div className="np-sticker np-sticker-one" aria-hidden="true">✳</div>
+    <div className="np-sticker np-sticker-two" aria-hidden="true">■</div>
+    <div className="np-hero-bottom">
+     <p>the money follows<br/>the work. <em>never the promise.</em></p>
+     <div className="np-hero-exhibit">
+      <div className="np-exhibit-art"><div className="np-exhibit-grid"><i/><i/><i/><i/></div><strong>01/04</strong><span>PAID ✓</span></div>
+      <div className="np-exhibit-aside"><span>REAL PROJECT / STUDIO DEV</span><strong>0.04 GEN FUNDED</strong><button onClick={()=>navigate("/proof")}>EXPLORE THE LIVE CASE <ArrowUpRight size={13}/></button></div>
+     </div>
     </div>
-    <div><ScheduleGrid entries={HERO_SCHEDULE} heading="REFERENCE PROJECT / VERIFIED LIVE STATES"/></div>
-  </div></section>
-  <div className="page-width">
-    <section className="control-benefits">
-      <div className="control-benefit"><GitBranch size={22}/><h3>Dependencies are enforceable.</h3><p>Upstream acceptance unlocks the correct successor. Failed work blocks its dependents, without freezing unrelated milestones.</p></div>
-      <div className="control-benefit"><ShieldCheck size={22}/><h3>Acceptance has a real standard.</h3><p>Each stage commits criteria and evidence before funding. GenLayer judges meaning; the contract applies the result.</p></div>
-      <div className="control-benefit"><LockKeyhole size={22}/><h3>Every tranche is accounted for.</h3><p>Earned value pays the contributor exactly once. Unused terminal tranches return to the client on safe close.</p></div>
-    </section>
-    <section className="control-live-teaser">
-      <div className="control-section-heading"><div><span className="mono-label">CANONICAL STUDIO DEV PROJECT</span><h2>Four milestones. One closed ledger.</h2></div><p>See the onchain acceptance, rejection, blocked dependency and unavailable-evidence paths in a single funded project.</p></div>
-      <div className="control-teaser-grid">
-        <div className="control-teaser-display"><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}><strong style={{fontSize:14}}>MilestoneVault / live-20261009-b</strong><ControlState state="CLOSED"/></div><div className="control-grid-head"><span>Work package</span><span>Release path</span><span>GEN</span><span>Outcome</span></div>{HERO_SCHEDULE.map(e=><div className="control-grid-row" key={e.id}><div className="control-grid-id"><strong>{e.name}</strong><small>{e.sub}</small></div><div className="control-grid-track"><span className={`control-grid-bar ${stateTone(e.state)}`} style={{marginLeft:`${e.left}%`,width:`${e.width}%`}}/></div><span className="control-amount">{e.amount}</span><ControlState state={e.state}/></div>)}</div>
-        <aside className="control-teaser-summary"><div><span>RETURNED TO CLIENT</span><strong>0.03</strong><p>GEN of 0.04 funded. A 0.01 GEN tranche was paid for accepted work; everything else was safely closed.</p></div><button onClick={()=>navigate("/proof")}>Inspect verified settlement <ArrowUpRight size={17}/></button></aside>
+    <div className="np-hero-tail"><span>01 — WHAT HAPPENS AFTER FUNDING?</span><span>SCROLL TO DISCOVER ↓</span><span>GENLAYER / STUDIO DEV</span></div>
+   </div>
+  </section>
+  <section className="np-work page-width" id="selected-work">
+   <div className="np-section-top"><div><span className="np-index">01 / FIELD NOTES</span><h2>selected<br/><i>outcomes.</i></h2></div><button className="np-inline-link" onClick={()=>navigate("/proof")}>FULL PROOF RECORD <ArrowUpRight size={16}/></button></div>
+   <div className="np-case-grid">
+    {outcomes.map((o)=><button key={o.id} className={`np-case np-case-${o.tone}`} onClick={()=>navigate(`/projects/${encodeURIComponent(CANONICAL_PROJECT_ID)}/milestones/${o.id}`)}>
+      <div className={`np-case-art np-art-${o.tone}`}>
+       <span className="np-art-corner">MV / {o.number}</span>
+       {o.tone==="paid"?<div className="np-art-paid"><span className="np-giant-amount">0.01</span><div className="np-art-paid-bar"><b/></div><span className="np-big-state">accepted ↗</span></div>:
+        o.tone==="rejected"?<div className="np-art-rejected"><span>NO</span><span>RELEASE.</span><div className="np-art-strike"/></div>:
+        o.tone==="blocked"?<div className="np-art-blocked"><div>02 <span>✕</span></div><svg viewBox="0 0 400 120" aria-hidden="true"><path d="M15 15 H195 V105 H365" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="8 9"/><path d="M355 96L365 105L355 114" fill="none" stroke="currentColor" strokeWidth="3"/></svg><strong>03 / STOPPED</strong></div>:
+        <div className="np-art-unresolved"><span className="np-art-unknown">?</span><span className="np-art-outline">EVIDENCE<br/>UNAVAILABLE</span></div>}
+       <span className="np-art-bottom">{o.state} / {o.number} <ArrowUpRight size={17}/></span>
       </div>
-    </section>
-  </div>
+      <div className="np-case-caption"><div><span>{o.label}</span><h3>{o.title}</h3><p>{o.sub}</p></div><ArrowUpRight size={18}/></div>
+     </button>)}
+   </div>
+  </section>
+  <section className="np-interlude"><div className="np-interlude-inner"><span>NOT ANOTHER PROMISE TRACKER.</span><h2>proof first.<br/><i>then payment.</i></h2><p>Four milestones. One frozen dependency graph. Every GEN accounted for. The contract sets the rule before anybody submits the work.</p><button onClick={()=>navigate(`/projects/${CANONICAL_PROJECT_ID}`)}>OPEN THE ACTUAL PROJECT <ArrowUpRight size={18}/></button><b aria-hidden="true">✱</b></div></section>
+  <section className="np-method page-width"><div className="np-section-top"><div><span className="np-index">02 / THE PROCESS</span><h2>how the<br/><i>system works.</i></h2></div><p>the uncomfortable questions are answered by the contract, not by whichever party asks loudest.</p></div>
+   {[
+    ["01","plan","Freeze a deliverable, its criteria, exact tranche and predecessors before funding."],
+    ["02","prove","Submit public evidence. GenLayer evaluates the frozen requirements and returns criterion facts."],
+    ["03","release","Pay accepted work once. Block failed dependencies. Return terminal unearned tranches."]
+   ].map(([n,t,d])=><div className="np-method-row" key={n}><span>{n}</span><h3>{t}<ArrowUpRight size={27}/></h3><p>{d}</p></div>)}
+  </section>
+  <section className="np-end"><span>YOUR NEXT PROJECT SHOULD HAVE RULES.</span><h2>make it<br/>measurable<span>.</span></h2><div><button onClick={()=>navigate("/create")}>START A PROJECT <ArrowUpRight size={17}/></button><button onClick={()=>navigate("/proof")}>EXPLORE LIVE EVIDENCE <ArrowRight size={17}/></button></div></section>
  </main>;
 }
-
 
 
 function Registry({ projects, loading, error, onRefresh }: { projects: Project[]; loading: boolean; error: string; onRefresh: () => void }) {
