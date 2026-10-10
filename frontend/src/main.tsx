@@ -5,6 +5,7 @@ import { ArrowDownRight, ArrowRight, ArrowUpRight, Check, CircleAlert, ExternalL
 import { CONTRACT_ADDRESS, connectWallet, currentWallet, errorMessage, explorerContract, explorerTx, formatGen, parseGen, readProject, readProjects, sameAddress, short, watchWallet, writeMethod, type TxStatus } from "./genlayer";
 import { accountingPresentation, canonicalProofCase, dependencyPresentation, milestoneActionFor, projectActionFor, stateLabel, stateTone } from "./product";
 import "./styles.css";
+import "./control-system.css";
 
 type Milestone = Record<string, any> & { milestone_id: string; state: string; tranche: number | string; dependencies: string[]; current_submission?: Record<string, any> | null };
 type Project = Record<string, any> & { project_id: string; state: string; milestone_ids: string[]; milestones: Milestone[]; client: string; contributor: string };
@@ -60,19 +61,166 @@ function App() {
   </div>;
 }
 
-function Header({ account, readOnly, onConnect }: { account: string | null; readOnly?: boolean; onConnect: () => void }) { return <header className="site-header"><div className="header-inner"><button className="brand" onClick={() => navigate("/")}><span className="brand-mark"><Layers3 size={20} /></span><span><strong>Milestone<span>Vault</span></strong><small>funded project plans</small></span></button><nav><button onClick={() => navigate("/projects")}>Projects</button><button onClick={() => navigate("/proof")}>Live proof</button><button className="nav-create" onClick={() => navigate("/create")}><Plus size={15} /> New plan</button></nav><div className="header-meta"><a href={CONTRACT_ADDRESS ? explorerContract() : "#"} target="_blank" rel="noreferrer"><i /> Studio Dev <ExternalLink size={12} /></a>{readOnly ? <span className="observer-badge">wallet-free read</span> : <button className="wallet-button" onClick={onConnect}><Wallet size={15} />{account ? short(account, 6, 4) : "Connect wallet"}</button>}</div></div></header>; }
 
-function Landing() { return <main><section className="hero page-width"><div className="hero-copy"><div className="eyebrow"><span>01 / MilestoneVault</span><span>Dependency-aware settlement</span></div><h1>Fund the plan.<br /><em>Release the work.</em></h1><p className="hero-lede">A project is more than one promise. MilestoneVault freezes the scope, maps the dependencies and releases each exact tranche only when its own deliverable earns it.</p><div className="hero-actions"><button className="button button-dark" onClick={() => navigate("/proof")}>Open the proof <ArrowUpRight size={16} /></button><button className="text-button" onClick={() => navigate("/projects")}>Browse project plans <ArrowRight size={16} /></button></div><div className="hero-notes"><span><ShieldCheck size={15} /> immutable acceptance packet</span><span><Network size={15} /> bounded dependency graph</span><span><Stamp size={15} /> exact native GEN</span></div></div><BlueprintHero /></section><section className="mechanism page-width"><div className="section-number">02 / The object</div><div className="mechanism-grid"><div><h2>A scope of work with a ledger attached.</h2><p>Every project begins as a plan: a frozen deliverable definition, a natural-language acceptance packet and a tranche for each stage. The graph decides what can move next.</p></div><div className="mechanism-list"><MechanismRow number="01" icon={<FileCheck2 size={18} />} title="Freeze the packet" copy="Criteria, evidence, deadlines, dependencies and repair budget are stored before funding." /><MechanismRow number="02" icon={<GitBranch size={18} />} title="Review each stage" copy="GenLayer returns criterion-level SATISFIED, VIOLATED or UNRESOLVED witnesses." /><MechanismRow number="03" icon={<ArrowDownRight size={18} />} title="Settle the exact tranche" copy="Acceptance opens one payout path. It never chooses amount, recipient or unrelated stages." /></div></div></section><section className="dark-band"><div className="page-width dark-band-inner"><div><div className="section-number light">03 / The distinction</div><h2>Not an escrow<br /><em>with steps.</em></h2></div><p>MilestoneVault treats dependencies as settlement law. A deployment cannot become actionable because design was accepted elsewhere; it becomes available only when its own required predecessor is paid.</p></div></section><section className="proof-teaser page-width"><div className="section-number">04 / Canonical proof plan</div><div className="proof-teaser-head"><h2>Three stages.<br /><em>Three honest outcomes.</em></h2><button className="button button-outline" onClick={() => navigate("/proof")}>Read the proof map <ArrowUpRight size={16} /></button></div><div className="proof-rows"><ProofRow mark="A" tone="good" title="Design accepted" copy="0.01 GEN releases to the contributor. Implementation becomes available." /><ProofRow mark="B" tone="bad" title="Implementation rejected" copy="A material criterion fails. No payout. Deployment stays blocked." /><ProofRow mark="C" tone="warn" title="Unavailable evidence" copy="UNRESOLVED holds the tranche. Safe close returns only unused value." /></div></section></main>; }
-function BlueprintHero() { return <div className="blueprint" aria-label="Milestone dependency plan"><div className="blueprint-top"><span>PROJECT / MV-001</span><span>PACKET FROZEN</span></div><div className="blueprint-title">NORTHSTAR<br /><span>release plan</span></div><div className="blueprint-graph"><div className="graph-line line-a" /><div className="graph-line line-b" /><PlanNode index="01" title="DESIGN" amount="0.01 GEN" state="PAID" tone="good" /><PlanNode index="02" title="BUILD" amount="0.01 GEN" state="AVAILABLE" tone="blue" /><PlanNode index="03" title="HANDOFF" amount="0.01 GEN" state="LOCKED" tone="ink" /></div><div className="blueprint-foot"><span>3 frozen tranches</span><span>2 predecessor edges</span><strong>exact release logic</strong></div></div>; }
-function PlanNode({ index, title, amount, state, tone }: { index: string; title: string; amount: string; state: string; tone: string }) { return <div className={`plan-node ${tone}`}><span className="node-index">{index}</span><div><strong>{title}</strong><small>{amount}</small></div><em>{state}</em></div>; }
-function MechanismRow({ number, icon, title, copy }: { number: string; icon: ReactNode; title: string; copy: string }) { return <div className="mechanism-row"><span className="row-number">{number}</span><span className="row-icon">{icon}</span><div><strong>{title}</strong><p>{copy}</p></div></div>; }
-function ProofRow({ mark, tone, title, copy }: { mark: string; tone: string; title: string; copy: string }) { return <div className={`proof-row ${tone}`}><span>{mark}</span><strong>{title}</strong><p>{copy}</p><ArrowRight size={18} /></div>; }
+function Header({ account, readOnly, onConnect }: { account: string | null; readOnly?: boolean; onConnect: () => void }) {
+ return <header className="site-header"><div className="header-inner">
+   <button className="brand" onClick={()=>navigate("/")} aria-label="MilestoneVault home">
+     <span className="brand-mark"><GitBranch size={23}/></span><span><strong>MILESTONE<span>VAULT</span></strong><small>PROJECT CONTROL / GENLAYER</small></span>
+   </button>
+   <nav aria-label="Main navigation">
+     <button onClick={()=>navigate("/projects")}>Projects</button>
+     <button onClick={()=>navigate("/proof")}>Live verification</button>
+     <button className="nav-create" onClick={()=>navigate("/create")}><Plus size={13}/> New project</button>
+   </nav>
+   <div className="header-meta"><a href={explorerContract()} target="_blank" rel="noreferrer"><i/> STUDIO DEV <ExternalLink size={12}/></a>
+     {readOnly?<span className="observer-badge">LIVE / READ-ONLY</span>:<button className="wallet-button" onClick={onConnect}><Wallet size={14}/>{account?short(account,5,4):"Connect wallet"}</button>}
+   </div>
+ </div></header>;
+}
 
-function Registry({ projects, loading, error, onRefresh }: { projects: Project[]; loading: boolean; error: string; onRefresh: () => void }) { return <main className="page-width app-page"><div className="page-lead"><div><div className="eyebrow">02 / Project registry</div><h1>Plans in<br /><em>motion.</em></h1><p>Read the frozen packet, follow the dependency map and see what the ledger will release next.</p></div><div className="lead-actions"><button className="button button-dark" onClick={() => navigate("/create")}><Plus size={16} /> New project plan</button><button className="icon-button" onClick={onRefresh} aria-label="Refresh project registry"><RefreshCw size={17} /></button></div></div>{error && <Notice message={error} />}{loading ? <LoadingState label="Reading the authoritative project register…" /> : projects.length ? <div className="project-grid">{projects.map((project) => <ProjectCard key={project.project_id} project={project} />)}</div> : <EmptyState title="No funded plans yet" copy="Create a project packet, add its tranches and fund the exact total to start the first plan." />}</main>; }
+
+
+function ControlState({ state }: {state:string}) { return <span className={`control-state ${stateTone(state)}`}>{stateLabel(state)}</span>; }
+
+type ScheduleEntry = { id:string; name:string; sub:string; state:string; amount:string; left?:number; width?:number };
+const HERO_SCHEDULE:ScheduleEntry[]=[
+ {id:"01",name:"Design specification",sub:"ROOT / M1",state:"PAID",amount:"0.01",left:2,width:26},
+ {id:"02",name:"Implementation",sub:"AFTER M1",state:"REJECTED",amount:"0.01",left:30,width:37},
+ {id:"03",name:"Release handoff",sub:"AFTER M2",state:"BLOCKED",amount:"0.01",left:70,width:19},
+ {id:"04",name:"Independent verification",sub:"ROOT / M4",state:"UNRESOLVED",amount:"0.01",left:4,width:52},
+];
+function ScheduleGrid({entries,heading="WORK PACKAGES",compact=false}:{entries:ScheduleEntry[];heading?:string;compact?:boolean}) {
+ return <div className={`control-schedule ${compact?"is-compact":""}`}>
+  <div className="control-schedule-top"><div style={{display:"flex",alignItems:"center",gap:11}}><span className="control-schedule-dot"><i/><i/><i/></span><strong>{heading}</strong></div><span>DEPENDENCY TRACKER / 01—04</span></div>
+  <div className="control-grid-head"><span>Milestone</span><span>Execution window</span><span>Tranche</span><span>State</span></div>
+  {entries.map(e=><div className="control-grid-row" key={e.id}>
+    <div className="control-grid-id"><strong>{e.name}</strong><small>{e.id} · {e.sub}</small></div>
+    <div className="control-grid-track"><span className={`control-grid-bar ${stateTone(e.state)}`} style={{marginLeft:`${e.left??0}%`,width:`${e.width??65}%`}}/></div>
+    <span className="control-amount">{e.amount}</span><ControlState state={e.state}/>
+  </div>)}
+  <div className="control-schedule-bottom"><span>FROZEN RULES · DETERMINISTIC TRANCHE SETTLEMENT</span><strong>GEN / ONCHAIN</strong></div>
+ </div>;
+}
+
+function Landing() {
+ return <main className="control-home">
+  <section className="control-hero"><div className="page-width control-hero-inner">
+    <div><div className="control-kicker">FUNDED PROJECT CONTROL</div>
+      <h1>Work moves.<br/><span>Funds follow.</span></h1>
+      <p>Build a dependency-aware delivery plan, fund its exact tranches, and release value only when each stage satisfies its frozen acceptance criteria.</p>
+      <div className="control-hero-actions">
+        <button className="button button-dark" onClick={()=>navigate(`/projects/${CANONICAL_PROJECT_ID}`)}>Explore live project <ArrowUpRight size={16}/></button>
+        <button className="control-ghost-button" onClick={()=>navigate("/create")}>Create a project <ArrowRight size={15}/></button>
+      </div>
+      <div className="control-hero-foot"><span>32 MAX MILESTONES</span><span>CRITERION-LEVEL AI REVIEW</span><span>EXACT GEN RELEASE</span></div>
+    </div>
+    <div><ScheduleGrid entries={HERO_SCHEDULE} heading="REFERENCE PROJECT / VERIFIED LIVE STATES"/></div>
+  </div></section>
+  <div className="page-width">
+    <section className="control-benefits">
+      <div className="control-benefit"><GitBranch size={22}/><h3>Dependencies are enforceable.</h3><p>Upstream acceptance unlocks the correct successor. Failed work blocks its dependents, without freezing unrelated milestones.</p></div>
+      <div className="control-benefit"><ShieldCheck size={22}/><h3>Acceptance has a real standard.</h3><p>Each stage commits criteria and evidence before funding. GenLayer judges meaning; the contract applies the result.</p></div>
+      <div className="control-benefit"><LockKeyhole size={22}/><h3>Every tranche is accounted for.</h3><p>Earned value pays the contributor exactly once. Unused terminal tranches return to the client on safe close.</p></div>
+    </section>
+    <section className="control-live-teaser">
+      <div className="control-section-heading"><div><span className="mono-label">CANONICAL STUDIO DEV PROJECT</span><h2>Four milestones. One closed ledger.</h2></div><p>See the onchain acceptance, rejection, blocked dependency and unavailable-evidence paths in a single funded project.</p></div>
+      <div className="control-teaser-grid">
+        <div className="control-teaser-display"><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}><strong style={{fontSize:14}}>MilestoneVault / live-20261009-b</strong><ControlState state="CLOSED"/></div><div className="control-grid-head"><span>Work package</span><span>Release path</span><span>GEN</span><span>Outcome</span></div>{HERO_SCHEDULE.map(e=><div className="control-grid-row" key={e.id}><div className="control-grid-id"><strong>{e.name}</strong><small>{e.sub}</small></div><div className="control-grid-track"><span className={`control-grid-bar ${stateTone(e.state)}`} style={{marginLeft:`${e.left}%`,width:`${e.width}%`}}/></div><span className="control-amount">{e.amount}</span><ControlState state={e.state}/></div>)}</div>
+        <aside className="control-teaser-summary"><div><span>RETURNED TO CLIENT</span><strong>0.03</strong><p>GEN of 0.04 funded. A 0.01 GEN tranche was paid for accepted work; everything else was safely closed.</p></div><button onClick={()=>navigate("/proof")}>Inspect verified settlement <ArrowUpRight size={17}/></button></aside>
+      </div>
+    </section>
+  </div>
+ </main>;
+}
+
+
+
+function Registry({ projects, loading, error, onRefresh }: { projects: Project[]; loading: boolean; error: string; onRefresh: () => void }) {
+ const [search,setSearch]=useState("");
+ const [filter,setFilter]=useState("ALL");
+ const filtered=projects.filter(p=>(p.title+" "+p.project_id+" "+p.scope).toLowerCase().includes(search.toLowerCase())&&(filter==="ALL"||p.state===filter));
+ return <main className="page-width control-workspace">
+  <div className="control-app-head"><div><div className="mono-label">WORKSPACE / PROJECT REGISTER</div><h1>Project control center</h1><p>Funded schedules, acceptance state, dependencies and GEN tranches. Every record is read from the deployed contract.</p></div><button className="button button-dark" onClick={()=>navigate("/create")}><Plus size={16}/> Build a project</button></div>
+  <div className="control-toolbar"><div className="control-toolbar-left"><input className="control-search" placeholder="Search projects or reference…" aria-label="Search projects" value={search} onChange={e=>setSearch(e.target.value)}/><div className="control-tabs">{["ALL","ACTIVE","COMPLETED","CLOSED"].map(f=><button key={f} className={filter===f?"active":""} onClick={()=>setFilter(f)}>{f==="ALL"?"All projects":stateLabel(f)}</button>)}</div></div><button className="icon-button" aria-label="Refresh live registry" onClick={onRefresh}><RefreshCw size={17}/></button></div>
+  {error&&<Notice message={error}/>}
+  {loading?<LoadingState label="Synchronizing onchain project register…"/>:<div className="control-registry">
+    <div className="control-registry-head"><span>Project / reference</span><span>Milestones</span><span>Progress</span><span>Funded</span><span>Lifecycle</span><span/></div>
+    {filtered.length?filtered.map(p=>{
+     const ms=p.milestones||[], paid=ms.filter(m=>m.state==="PAID").length;
+     return <button key={p.project_id} className="control-registry-row" onClick={()=>navigate(`/projects/${encodeURIComponent(p.project_id)}`)}>
+      <div className="control-registry-name"><strong>{p.title}</strong><small>{p.project_id}</small></div>
+      <strong>{ms.length} work packages</strong>
+      <div className="control-progress"><div className="control-progress-rail"><span style={{width:`${ms.length?paid/ms.length*100:0}%`}}/></div><small>{paid}/{ms.length} paid</small></div>
+      <strong className="control-registry-amount">{genAmount(p.initial_escrow||p.total_tranches)}</strong>
+      <ControlState state={p.state}/><ArrowUpRight size={17}/>
+     </button>
+    }):<EmptyState title="No matching projects" copy="Try clearing your filters or create a funded project schedule."/>}
+  </div>}
+ </main>;
+}
+
+
 function ProjectCard({ project }: { project: Project }) { const milestones = project.milestones || []; const paid = milestones.filter((item) => item.state === "PAID").length; return <button className="project-card" onClick={() => navigate(`/projects/${encodeURIComponent(project.project_id)}`)}><div className="card-top"><span className="mono-label">{project.project_id}</span><StatePill state={project.state} /></div><h2>{project.title}</h2><p>{project.scope}</p><div className="card-graph">{milestones.map((item, index) => <div className={`card-node ${stateTone(item.state)}`} key={item.milestone_id}><span>{String(index + 1).padStart(2, "0")}</span><strong>{item.title}</strong><em>{item.state}</em></div>)}</div><div className="card-foot"><span>{paid} / {milestones.length} tranches paid</span><span>{genAmount(project.total_tranches)} planned <ArrowUpRight size={14} /></span></div></button>; }
 
-function ProjectDossier({ project, loading, error, account, tx, onWrite }: { project?: Project; loading: boolean; error: string; account: string | null; tx: TxStatus | null; onWrite: (method: string, args: unknown[], value?: bigint) => Promise<string | null> }) { if (loading && !project) return <main className="page-width centered"><LoadingState label="Loading project packet…" /></main>; if (!project) return <main className="page-width centered"><Notice message={error || "Project not found or the contract address is not configured."} /></main>; const canClient = sameAddress(account, project.client); const canContributor = sameAddress(account, project.contributor); const accounting = project.accounting || {}; const milestones = project.milestones || []; return <main className="page-width dossier"><div className="dossier-head"><div><div className="eyebrow">Project packet / {project.project_id}</div><h1>{project.title}</h1><p>{project.scope}</p></div><StatePill state={project.state} /></div><div className="dossier-meta"><Meta label="Client" value={short(project.client)} /><Meta label="Contributor" value={short(project.contributor)} /><Meta label="Frozen plan" value={`${milestones.length} tranches`} /><Meta label="Total escrow" value={genAmount(project.total_tranches)} /></div><div className="dossier-grid"><section><div className="section-heading"><div><span className="mono-label">DEPENDENCY MAP</span><h2>The plan moves one stage at a time.</h2></div><span className="fingerprint"><Fingerprint size={14} /> {short(project.project_fingerprint, 12, 8)}</span></div><DependencyMap milestones={milestones} /><div className="milestone-list">{milestones.map((item, index) => <MilestoneRow key={item.milestone_id} milestone={item} index={index} />)}</div></section><aside className="side-rail"><ActionRail project={project} account={account} canClient={canClient} canContributor={canContributor} onWrite={onWrite} tx={tx} /><Accounting accounting={accounting} project={project} /></aside></div></main>; }
-function DependencyMap({ milestones }: { milestones: Milestone[] }) { return <div className="dependency-map"><div className="map-grid-lines" />{milestones.map((item, index) => { const presentation = dependencyPresentation(item, milestones); return <div className={`map-card ${stateTone(item.state)}`} style={{ left: `${10 + (index % 3) * 31}%`, top: `${30 + Math.floor(index / 3) * 110}px` }} key={item.milestone_id}><span>{String(index + 1).padStart(2, "0")}</span><strong>{item.title}</strong><small>{presentation.status === "blocked" ? `blocked by ${presentation.blockedBy.join(", ") || "failed predecessor"}` : item.dependencies?.length ? `after ${item.dependencies.join(", ")}` : "root stage"}</small><StatePill state={item.state} /></div>; })}</div>; }
+
+function ProjectDossier({ project, loading, error, account, tx, onWrite }: { project?: Project; loading: boolean; error: string; account: string | null; tx: TxStatus | null; onWrite: (method: string, args: unknown[], value?: bigint) => Promise<string | null> }) {
+ const [selected,setSelected]=useState("");
+ if (loading&&!project) return <main className="page-width centered"><LoadingState label="Reading project controls…"/></main>;
+ if (!project) return <main className="page-width centered"><Notice message={error||"The project is unavailable."}/></main>;
+ const ms=project.milestones||[], choice=ms.find(m=>m.milestone_id===selected)||ms[0], accounting=accountingPresentation(project.accounting||{});
+ return <main className="page-width control-workspace">
+   <div className="control-breadcrumb"><button onClick={()=>navigate("/projects")}>Project register</button><ArrowRight size={12}/><span>{project.project_id}</span></div>
+   <div className="control-project-head"><div><span className="mono-label">PROJECT WORKSPACE / DEPENDENCY CONTROL</span><h1>{project.title}</h1><p>{project.scope}</p></div><ControlState state={project.state}/></div>
+   <div className="control-summary-strip">
+    <div><span>Funded capital</span><strong>{genAmount(project.initial_escrow||project.total_tranches)}</strong></div>
+    <div><span>Released</span><strong>{genAmount(accounting.values.paidTotal)}</strong></div>
+    <div><span>Still locked</span><strong>{genAmount(accounting.values.stillLocked)}</strong></div>
+    <div><span>Refundable*</span><strong>{genAmount(accounting.values.refundableAmount)}</strong></div>
+    <div><span>Work packages</span><strong>{ms.length}</strong></div>
+   </div>
+   <div className="control-workspace-grid">
+    <section className="control-panel">
+     <div className="control-panel-top"><div><span className="mono-label">LIVE DEPENDENCY SCHEDULE</span><h2 style={{marginTop:6}}>Execution map</h2></div><small>SELECT A WORK PACKAGE TO INSPECT</small></div>
+     <ControlGantt milestones={ms} selected={choice?.milestone_id||""} onSelect={setSelected}/>
+     <div className="control-panel-body" style={{borderTop:"1px solid #e4eaf2"}}><div className="control-kicker" style={{color:"#5d7496"}}>SETTLEMENT RULE</div><p style={{fontSize:12,color:"#667a93",lineHeight:1.75,margin:"15px 0 0"}}>Only accepted predecessor work unlocks a dependent stage. A rejected predecessor blocks its downstream tranches. Schedules show dependency order, not fabricated calendar dates.</p></div>
+    </section>
+    <aside className="control-rail-stack">
+     {choice&&<section className="control-panel control-inspector">
+       <div className="control-panel-top"><h2>Work package inspector</h2><ControlState state={choice.state}/></div>
+       <div className="control-panel-body"><span className="mono-label">{choice.milestone_id}</span><h3 className="control-inspector-title">{choice.title}</h3><p className="control-inspector-text">{choice.deliverable_definition}</p>
+         <dl className="control-inspector-dl">
+           <div><dt>Tranche</dt><dd>{genAmount(choice.tranche)}</dd></div>
+           <div><dt>Dependencies</dt><dd>{choice.dependencies?.length?choice.dependencies.join(", "):"Root / none"}</dd></div>
+           <div><dt>Repair budget</dt><dd>{String(choice.repair_budget??0)}</dd></div>
+           <div><dt>Paid to contributor</dt><dd>{genAmount(choice.paid_amount||0)}</dd></div>
+         </dl>
+         <div className="control-inspector-action"><button className="button button-dark" onClick={()=>navigate(`/projects/${encodeURIComponent(project.project_id)}/milestones/${encodeURIComponent(choice.milestone_id)}`)}>Open work package <ArrowUpRight size={15}/></button></div>
+       </div>
+     </section>}
+     <ActionRail project={project} account={account} canClient={sameAddress(account,project.client)} canContributor={sameAddress(account,project.contributor)} onWrite={onWrite} tx={tx}/>
+     <Accounting accounting={project.accounting||{}} project={project}/>
+    </aside>
+   </div>
+ </main>;
+}
+
+
+
+function ControlGantt({ milestones, selected="", onSelect, readOnly=false }: { milestones: Milestone[]; selected?:string; onSelect?:(id:string)=>void;readOnly?:boolean }) {
+ const count=Math.max(1,milestones.length);
+ return <div className="control-gantt"><div className="control-gantt-head"><span>WORK PACKAGE / PREDECESSOR</span><span>DEPENDENCY-ORDER TRACK</span><span style={{textAlign:"right"}}>TRANCHE</span></div>
+ {milestones.map((m,i)=>{
+  const deps=m.dependencies||[], blocked=deps.length&&["BLOCKED","LOCKED"].includes(m.state);
+  return <button type="button" key={m.milestone_id} className={`control-gantt-row ${selected===m.milestone_id?"selected":""}`} onClick={()=>onSelect?.(m.milestone_id)} aria-label={`Inspect ${m.title}, ${m.state}`}>
+    <div className="control-gantt-name"><span className="control-gantt-ordinal">{String(i+1).padStart(2,"0")}</span><div><strong>{m.title}</strong><small>{deps.length?`AFTER ${deps.join(", ")}`:"ROOT / NO PREDECESSOR"}</small></div></div>
+    <div className="control-gantt-track"><span className={`control-gantt-bar ${stateTone(m.state)}`} style={{left:`${Math.min(i*15,65)}%`,width:`${Math.max(18,72-i*8)}%`}}/>{blocked&&<LockKeyhole size={13} className="control-gantt-arrow"/>}</div>
+    <div className="control-gantt-amount"><strong>{genAmount(m.tranche)}</strong><ControlState state={m.state}/></div>
+  </button>;
+ })}
+ </div>;
+}
+
+
 function MilestoneRow({ milestone, index }: { milestone: Milestone; index: number }) { return <button className="milestone-row" onClick={() => navigate(`/projects/${encodeURIComponent(milestone.project_id)}/milestones/${encodeURIComponent(milestone.milestone_id)}`)}><span className="milestone-index">{String(index + 1).padStart(2, "0")}</span><div><strong>{milestone.title}</strong><small>{milestone.dependencies?.length ? `Depends on ${milestone.dependencies.join(", ")}` : "Root milestone"} · deadline {milestone.deadline_utc}</small></div><span className="milestone-amount">{genAmount(milestone.tranche)}</span><StatePill state={milestone.state} /><ArrowUpRight size={17} /></button>; }
 function ActionRail({ project, account, canClient, canContributor, onWrite, tx }: { project: Project; account: string | null; canClient: boolean; canContributor: boolean; onWrite: (method: string, args: unknown[], value?: bigint) => Promise<string | null>; tx: TxStatus | null }) { const role = canClient ? "client" : canContributor ? "contributor" : "observer"; const action = projectActionFor(project.state, role); const next = action === "FUND" ? "Fund the exact plan" : action === "ACTIVATE" ? "Activate the funded plan" : action === "CLOSE" ? "Safe close / refund unused" : project.state === "CLOSED" ? "Plan closed" : "Review the next available stage"; return <section className="action-rail"><span className="mono-label">NEXT MOVE</span><h3>{next}</h3><p>{project.state === "DRAFT" ? "Funding freezes the whole milestone packet and its dependency graph." : project.state === "FUNDED" ? "Activation opens only root milestones; dependent stages remain locked." : "Each milestone carries its own evidence and settlement action."}</p>{action === "FUND" && <button className="button button-green wide" onClick={() => void onWrite("fund_project", [project.project_id], BigInt(project.total_tranches))}><LockKeyhole size={15} /> Fund {genAmount(project.total_tranches)}</button>}{action === "ACTIVATE" && <button className="button button-dark wide" onClick={() => void onWrite("activate_project", [project.project_id])}>Activate project <ArrowRight size={15} /></button>}{action === "CLOSE" && <button className="button button-orange wide" onClick={() => void onWrite("close_project", [project.project_id])}>Safe close / refund unused <ArrowRight size={15} /></button>}{!account && <small className="action-hint">Connect a wallet to authorize actions.</small>}{account && !canClient && !canContributor && <small className="action-hint">Connected wallet is not one of the frozen project roles.</small>}{tx && <TxBox tx={tx} />}</section>; }
 function MilestoneDossier({ project, milestoneId, loading, error, account, tx, onWrite }: { project?: Project; milestoneId?: string; loading: boolean; error: string; account: string | null; tx: TxStatus | null; onWrite: (method: string, args: unknown[], value?: bigint) => Promise<string | null> }) { const milestone = project?.milestones?.find((item) => item.milestone_id === milestoneId); if (loading && !project) return <main className="page-width centered"><LoadingState label="Loading deliverable dossier…" /></main>; if (!project || !milestone) return <main className="page-width centered"><Notice message={error || "Milestone not found."} /></main>; const canClient = sameAddress(account, project.client); const canContributor = sameAddress(account, project.contributor); const sourceUrl = `https://evidence.milestonevault.example/${project.project_id}/${milestone.milestone_id}`; const manifest = JSON.stringify([{ evidence_id: "deliverable", url: sourceUrl, sha256: "", project_id: project.project_id, milestone_id: milestone.milestone_id }]); const submit = () => void onWrite("submit_milestone", [project.project_id, milestone.milestone_id, manifest]); const repair = () => void onWrite("repair_milestone", [project.project_id, milestone.milestone_id, manifest]); return <main className="page-width milestone-dossier"><button className="back-link" onClick={() => navigate(`/projects/${encodeURIComponent(project.project_id)}`)}><ArrowRight size={14} className="back-icon" /> Back to project packet</button><div className="milestone-hero"><div><div className="eyebrow">Deliverable dossier / {milestone.milestone_id}</div><h1>{milestone.title}</h1><p>{milestone.deliverable_definition}</p></div><StatePill state={milestone.state} /></div><div className="dossier-grid milestone-layout"><section><div className="packet-sheet"><div className="sheet-top"><span>FROZEN ACCEPTANCE PACKET</span><Fingerprint size={15} /></div><h2>What must be true</h2>{(milestone.criteria || []).map((criterion: Record<string, any>) => <div className="criterion" key={criterion.criterion_id}><span className="criterion-dot" /><div><strong>{criterion.requirement}</strong><small>{criterion.required ? "Required for acceptance" : "Optional context"}</small></div>{milestone.adjudication?.criteria?.find((item: Record<string, any>) => item.criterion_id === criterion.criterion_id) && <StatePill state={milestone.adjudication.criteria.find((item: Record<string, any>) => item.criterion_id === criterion.criterion_id).status} />}</div>)}<div className="packet-divider" /><div className="packet-facts"><Meta label="Exact tranche" value={genAmount(milestone.tranche)} /><Meta label="Dependencies" value={milestone.dependencies?.length ? milestone.dependencies.join(" · ") : "None / root stage"} /><Meta label="Repair budget" value={`${milestone.repair_budget} revisions`} /><Meta label="Deadline" value={milestone.deadline_utc} /></div></div>{milestone.adjudication && <ResultCard milestone={milestone} />}</section><aside className="side-rail"><section className="action-rail"><span className="mono-label">DELIVERABLE ACTION</span><h3>{milestone.state === "AVAILABLE" ? "Submit evidence" : milestone.state === "SUBMITTED" ? "Await semantic review" : milestone.state === "ACCEPTED" ? "Release exact tranche" : milestone.state === "REPAIRABLE" ? "Submit bounded repair" : milestone.state === "PAID" ? "Paid once" : milestone.state}</h3><p>{milestone.state === "AVAILABLE" ? "Commit a source manifest bound to this project and milestone." : "The state machine decides which action is legal next."}</p>{milestone.state === "AVAILABLE" && <button className="button button-dark wide" disabled={!canContributor} onClick={submit}><FileCheck2 size={15} /> Submit evidence packet</button>}{milestone.state === "REPAIRABLE" && <button className="button button-dark wide" disabled={!canContributor} onClick={repair}>Submit repair revision <ArrowRight size={15} /></button>}{milestone.state === "SUBMITTED" && <button className="button button-green wide" disabled={!canClient} onClick={() => void onWrite("adjudicate_milestone", [project.project_id, milestone.milestone_id])}><ShieldCheck size={15} /> Run GenLayer review</button>}{milestone.state === "ACCEPTED" && <button className="button button-green wide" disabled={!canContributor} onClick={() => void onWrite("settle_milestone", [project.project_id, milestone.milestone_id])}>Release {genAmount(milestone.tranche)} <ArrowRight size={15} /></button>}{tx && <TxBox tx={tx} />}</section><AccountingMini milestone={milestone} /></aside></div></main>; }
