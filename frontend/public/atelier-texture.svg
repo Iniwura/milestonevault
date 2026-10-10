@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1100" viewBox="0 0 1600 1100">
+<defs>
+ <filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence baseFrequency=".47" numOctaves="3" type="fractalNoise" seed="12" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".11"/></feComponentTransfer></filter>
+ <pattern id="dots" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r=".8" fill="#aaa9a3"/></pattern>
+ <pattern id="hatched" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(26)"><rect width="28" height="28" fill="none"/><path d="M3 0 V28 M9 0 V28 M24 0 V28" stroke="#d5d4d0" stroke-width="2"/></pattern>
+</defs>
+<rect width="1600" height="1100" fill="#eeefed"/>
+<g opacity=".58">
+ <path d="M 260 -140 C 375 210, 625 150, 736 390 S 1048 721, 970 1080" fill="none" stroke="#e2e1de" stroke-width="140" stroke-linecap="round"/>
+ <path d="M1135 -180L1680 90L1400 590L915 360Z" fill="#fafaf8"/>
+ <path d="M1135 -180L1680 90L1400 590L915 360Z" fill="url(#hatched)"/>
+ <path d="M-95 735 C190 445 400 650 580 585 L820 1020 L-100 1250 Z" fill="#f9f9f7"/>
+ <path d="M-95 735 C190 445 400 650 580 585 L820 1020 L-100 1250 Z" fill="url(#dots)"/>
+</g>
+<g stroke="#bebebb" fill="none" opacity=".38">
+ <circle cx="1175" cy="495" r="235" stroke-width="1"/><circle cx="1175" cy="495" r="286" stroke-width="2"/><circle cx="1175" cy="495" r="345" stroke-width="1"/>
+ <path d="M100 925C435 710 676 970 870 750M410 -100C315 215 710 385 650 600" stroke-width="5"/>
+</g>
+<g opacity=".56">
+ <path d="M1035 185h295M1190 40v275" stroke="#c5c4c1" stroke-width="1"/>
+ <rect x="1478" y="280" width="8" height="8" fill="#e75732"/>
+ <rect x="190" y="675" width="10" height="10" fill="#7a96b6"/>
+ <rect x="1222" y="816" width="6" height="6" fill="#c9d049"/>
+ <circle cx="95" cy="232" r="3" fill="#d93f34"/>
+ <circle cx="642" cy="462" r="4" fill="#ef7a2b"/>
+</g>
+<rect width="1600" height="1100" filter="url(#grain)" opacity=".95" />
+</svg>
