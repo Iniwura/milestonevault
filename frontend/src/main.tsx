@@ -387,18 +387,68 @@ function CreatePage({ account, onWrite }: { account: string | null; onWrite: (me
 }
 
 
+
 function ProofPage({ project, loading, error, onRefresh }: { project?: Project; loading: boolean; error: string; onRefresh: () => void }) {
-  if (loading && !project) return <main className="proof-page"><section className="proof-hero page-width"><div className="eyebrow light">04 / Canonical live proof</div><h1>Reading the<br /><em>authoritative ledger.</em></h1><LoadingState label="Reading the canonical project from Studio Dev…" /></section></main>;
-  if (!project) return <main className="proof-page"><section className="proof-hero page-width"><div className="eyebrow light">04 / Canonical live proof</div><h1>The live proof<br /><em>is unavailable.</em></h1><p>{error || "The canonical project could not be read from the deployed contract."}</p><button className="button button-green" onClick={onRefresh}><RefreshCw size={15} /> Retry live read</button></section></main>;
-  const milestones = project.milestones || [];
-  const byId = new Map(milestones.map((milestone) => [milestone.milestone_id, milestone]));
-  const accounting = accountingPresentation(project.accounting || {});
-  const m1 = byId.get("m1-design-b");
-  const m2 = byId.get("m2-build-b");
-  const m3 = byId.get("m3-handoff-b");
-  const m4 = byId.get("m4-unavailable-b");
-  return <main className="proof-page"><section className="proof-hero page-width"><div className="eyebrow light"><span>04 / Canonical live proof</span><span>READ-ONLY / FROM CHAIN</span></div><h1>Follow value<br /><em>through the graph.</em></h1><p>This page reads the deployed MilestoneVault contract directly. No wallet is required to verify the canonical project, its dependency consequence or its final ledger.</p><div className="proof-meta"><span>Studio Dev · 61997</span><span>{project.project_id}</span><span>project {stateLabel(project.state)}</span><span>contract {short(CONTRACT_ADDRESS, 8, 6)}</span></div></section><section className="page-width proof-live"><div className="proof-live-header"><div><span className="mono-label">AUTHORITATIVE PROJECT READ</span><h2>{project.title}</h2><p>{project.scope}</p></div><StatePill state={project.state} /></div><div className="proof-ledger"><ProofMetric label="Initial escrow" value={genAmount(accounting.values.initialEscrow)} /><ProofMetric label="Paid to contributor" value={genAmount(accounting.values.paidTotal)} accent="good" /><ProofMetric label="Client refund" value={genAmount(accounting.values.refundableAmount)} accent="warn" /><ProofMetric label="Ledger" value={accounting.balanced ? "BALANCED" : "CHECK"} accent={accounting.balanced ? "good" : "bad"} /></div><small className="proof-ledger-note">At close: 0.04 GEN = 0.01 GEN paid + 0 GEN locked + 0.03 GEN refundable. Contract principal remaining after close: 0 GEN.</small></section><section className="page-width proof-dependency"><div className="section-heading"><div><span className="mono-label">DEPENDENCY CONSEQUENCE</span><h2>One accepted tranche opens the next. One failed predecessor stops the chain.</h2></div></div><div className="proof-chain"><span className="chain-node good">M1 success</span><ArrowRight size={18} /><span className="chain-node blue">M2 unlocked</span><ArrowRight size={18} /><span className="chain-node bad">M2 rejection</span><ArrowRight size={18} /><span className="chain-node bad">M3 blocked</span></div></section><section className="page-width proof-milestones"><ProofMilestone mark="M1" title="Design" milestone={m1} consequence="Accepted and paid once; M2 became AVAILABLE." /><ProofMilestone mark="M2" title="Implementation" milestone={m2} consequence="Material criterion failure; no payout; M3 became BLOCKED." /><ProofMilestone mark="M3" title="Deployment + handoff" milestone={m3} consequence="Blocked by rejected predecessor; unrelated value was not released." /><ProofMilestone mark="M4" title="Unavailable evidence" milestone={m4} consequence="Independent root case; first unavailable result was terminal UNRESOLVED with repair budget 0." /></section><section className="page-width proof-support"><div className="section-heading"><div><span className="mono-label">SUPPORTING TRANSACTIONS</span><h2>Finalized Studio Dev evidence</h2></div><a className="button button-outline proof-contract-link" href={explorerContract()} target="_blank" rel="noreferrer">Open contract <ExternalLink size={14} /></a></div><div className="proof-tx-list">{CANONICAL_PROOF_TRANSACTIONS.map(([label, hash]) => <a key={hash} href={explorerTx(hash)} target="_blank" rel="noreferrer"><span>{label}</span><code>{short(hash, 12, 8)}</code><ExternalLink size={14} /></a>)}</div><div className="proof-support-footer"><a className="button button-green" href={`/projects/${encodeURIComponent(CANONICAL_PROJECT_ID)}`}>Open canonical project dossier <ArrowUpRight size={15} /></a><span>Historical failed attempt <code>{HISTORICAL_PROJECT_ID}</code> remains documented separately and is not part of this proof.</span></div></section></main>;
+ const [focus,setFocus]=useState("m1-design-b");
+ if(loading&&!project)return <main className="control-proof"><div className="page-width"><LoadingState label="Reading the canonical Studio Dev project…"/></div></main>;
+ if(!project)return <main className="control-proof"><div className="page-width"><div className="control-proof-header"><div><div className="control-kicker">LIVE READ / STUDIO DEV</div><h1>Unable to load project proof</h1><p>{error||"The canonical project could not be retrieved from the deployed contract."}</p></div><button className="button button-dark" onClick={onRefresh}><RefreshCw size={15}/> Retry</button></div></div></main>;
+ const ms=project.milestones||[],selected=ms.find(m=>m.milestone_id===focus)||ms[0];
+ const ledger=accountingPresentation(project.accounting||{}).values;
+ const rem=ledger.initialEscrow-ledger.paidTotal-ledger.refundableAmount;
+ const docs=[
+  ["Create and fund","0x349da5a9833ba9f51456b41f9bc7fca8aa67ab110899bf9eaf0084d60777ea45"],
+  ...CANONICAL_PROOF_TRANSACTIONS
+ ] as const;
+ return <main className="control-proof"><div className="page-width">
+  <header className="control-proof-header">
+    <div><div className="control-kicker">PROOF / CANONICAL PROJECT / LIVE CHAIN READ</div>
+      <h1>Four gates.<br/>One settled project.</h1>
+      <p>Follow the real dependency consequences and transfers from a funded 0.04 GEN project. These states come from the deployed contract, not a simulated demo.</p></div>
+    <div className="control-proof-header-meta"><ControlState state={project.state}/><span>STUDIO DEV · CHAIN 61997</span><span>{project.project_id}</span><span>WALLET NOT REQUIRED</span></div>
+  </header>
+  <div className="control-proof-frame">
+   <div className="control-proof-split">
+     <section className="control-panel">
+       <div className="control-panel-top"><div><div className="mono-label">DEPENDENCY-ORDER VIEW</div><h2 style={{marginTop:8}}>Accepted, rejected, blocked, unresolved.</h2></div><span className="mono-label">LIVE STATES</span></div>
+       <ControlGantt milestones={ms} selected={selected?.milestone_id||""} onSelect={setFocus} readOnly/>
+       <div className="control-panel-body"><div className="control-kicker" style={{color:"#627ca2"}}>WHAT THIS PROVES</div><p style={{fontSize:12,lineHeight:1.75,color:"#687b95",marginBottom:0}}>M1 earned 0.01 GEN and unlocked M2. M2 failed a material criterion, blocking dependent M3. Independent M4 could not verify its evidence and stayed fail-closed. Closure refunded the three unearned tranches.</p></div>
+     </section>
+     <aside className="control-proof-ledger">
+       <div className="mono-label">SETTLEMENT RECONCILIATION</div><h2>Native GEN ledger</h2>
+       <div className="control-money-line"><span>Escrow funded</span><strong>{genAmount(ledger.initialEscrow)}</strong></div>
+       <div className="control-money-line"><span>Earned / contributor paid</span><strong>-{genAmount(ledger.paidTotal)}</strong></div>
+       <div className="control-money-line"><span>Unspent / client refunded*</span><strong>-{genAmount(ledger.refundableAmount)}</strong></div>
+       <div className="control-money-line final"><span>Principal remaining</span><strong>{genAmount(project.state==="CLOSED"?rem:ledger.stillLocked)}</strong></div>
+       <div className="control-proof-explainer">*The contract’s refundable classification remains a historical ledger figure after close. The actual refund is verified by the finalized native-transfer message and receipt.</div>
+       <a style={{display:"flex",alignItems:"center",gap:8,marginTop:23,color:"#175bdc",fontSize:12,fontWeight:750,textDecoration:"none"}} href={explorerContract()} target="_blank" rel="noreferrer">View deployed contract <ExternalLink size={14}/></a>
+     </aside>
+   </div>
+  </div>
+  <div className="control-case-controls"><div><div className="mono-label">SELECT A MILESTONE / INSPECT THE LAW</div><h2>Decision trace</h2></div><button className="button button-outline" onClick={onRefresh}><RefreshCw size={14}/> Refresh onchain</button></div>
+  <section className="control-case-grid">{ms.map((m,i)=><article key={m.milestone_id} className={`control-case ${focus===m.milestone_id?"is-selected":""}`}>
+      <button className="control-case-button" onClick={()=>setFocus(m.milestone_id)}><span className="control-case-index">WORK PACKAGE / {String(i+1).padStart(2,"0")}</span><ControlState state={m.state}/><h3>{m.title}</h3><p>{m.state==="PAID"?"Accepted with exact contributor payout. Its dependent milestone could proceed.":m.state==="REJECTED"?"Material acceptance violation. No supplier payment; downstream is blocked.":m.state==="BLOCKED"?"A failed predecessor prevented activation and tranche release.":"Unavailable evidence never authorized payment."}</p></button>
+      <div className="control-case-foot"><span>{genAmount(m.paid_amount||0)} PAID</span><ArrowUpRight size={15}/></div>
+  </article>)}</section>
+  {selected&&<section className="control-proof-evidence">
+   <div className="control-proof-evidence-head"><h3>Selected: {selected.title}</h3><ControlState state={selected.state}/></div>
+   <div style={{padding:"20px 23px",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:18}}>
+     <div><div className="mono-label">FROZEN TRANCHE</div><strong style={{display:"block",marginTop:8,fontSize:20}}>{genAmount(selected.tranche)}</strong></div>
+     <div><div className="mono-label">ACTUAL PAID</div><strong style={{display:"block",marginTop:8,fontSize:20}}>{genAmount(selected.paid_amount||0)}</strong></div>
+     <div><div className="mono-label">PREDECESSOR</div><strong style={{display:"block",marginTop:8,fontSize:12}}>{selected.dependencies?.length?selected.dependencies.join(", "):"None · root stage"}</strong></div>
+   </div>
+   {selected.adjudication?.criteria?.map((criterion:Record<string,any>)=><div key={criterion.criterion_id} style={{display:"flex",padding:"13px 23px",gap:15,borderTop:"1px solid #e5edf5",alignItems:"start",justifyContent:"space-between",flexWrap:"wrap"}}>
+     <div><strong style={{fontSize:12}}>{criterion.criterion_id}</strong><p style={{color:"#73849c",fontSize:12,lineHeight:1.65,margin:"7px 0"}}>{criterion.observed_fact}</p></div><ControlState state={criterion.status}/>
+   </div>)}
+   <div style={{padding:"0 23px 18px"}}><button className="button button-outline" onClick={()=>navigate(`/projects/${encodeURIComponent(project.project_id)}/milestones/${encodeURIComponent(selected.milestone_id)}`)}>Open full work-package dossier <ArrowUpRight size={14}/></button></div>
+  </section>}
+  <section className="control-proof-evidence" style={{marginTop:30}}>
+   <div className="control-proof-evidence-head"><h3>Finalized transaction evidence</h3><span className="mono-label">EXPLORER / STUDIO DEV</span></div>
+   {docs.map(([title,hash])=><a key={hash} href={explorerTx(hash)} target="_blank" rel="noreferrer"><span>{title}</span><code>{short(hash,14,10)}</code><ExternalLink size={15}/></a>)}
+  </section>
+ </div></main>;
 }
+
+
 function ProofMetric({ label, value, accent = "" }: { label: string; value: string; accent?: string }) { return <div className={`proof-metric ${accent}`}><span>{label}</span><strong>{value}</strong></div>; }
 function ProofMilestone({ mark, title, milestone, consequence }: { mark: string; title: string; milestone?: Milestone; consequence: string }) { const state = milestone?.state || "MISSING"; return <article className={`proof-milestone ${stateTone(state)}`}><div className="proof-milestone-mark">{mark}</div><div className="proof-milestone-body"><div className="proof-milestone-top"><div><span className="mono-label">{title}</span><h3>{milestone?.milestone_id || "Canonical milestone not found"}</h3></div><StatePill state={state} /></div><p>{consequence}</p><div className="proof-milestone-meta"><span>Tranche <strong>{milestone ? genAmount(milestone.tranche) : "—"}</strong></span><span>Paid <strong>{milestone ? genAmount(milestone.paid_amount || 0) : "—"}</strong></span><span>Depends on <strong>{milestone?.dependencies?.length ? milestone.dependencies.join(", ") : "root stage"}</strong></span></div></div></article>; }
 function ProofCase({ proof, mark, tone: caseTone, title, copy }: { proof: ReturnType<typeof canonicalProofCase>; mark: string; tone: string; title: string; copy: string }) { return <article className={`proof-case ${caseTone}`}><span className="proof-mark">{mark}</span><div><span className="mono-label">CASE {mark} / {proof.route}</span><h2>{title}</h2><p>{copy}</p></div><div className="proof-law"><span>SETTLEMENT LAW</span><strong>{proof.settlementLaw}</strong></div></article>; }
