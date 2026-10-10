@@ -299,7 +299,7 @@ const SEED_STAGES:StageDraft[]=[
  {id:"handoff",title:"Production handoff",definition:"Deployment instructions and release handoff materials.",acceptance:"The public handoff evidence includes the agreed deployment and operational instructions.",amount:"0.01",dependency:"build"}
 ];
 function CreatePage({ account, onWrite }: { account: string | null; onWrite: (method: string, args: unknown[], value?: bigint) => Promise<string | null> }) {
- const [form,setForm]=useState({projectId:`project-${Date.now().toString(36)}`,contributor:"",title:"New delivery project",scope:"Deliver the agreed project through documented and verifiable milestones."});
+ const [form,setForm]=useState({projectId:`project-${Date.now().toString(36)}`,contributor:"",title:"New delivery project",scope:"Deliver the agreed project through documented and verifiable milestones.",deadlineUtc:"2099-01-01T00:00:00Z",repairBudget:"1"});
  const [stages,setStages]=useState<StageDraft[]>(SEED_STAGES);
  const [message,setMessage]=useState("");
  const update=(index:number,key:keyof StageDraft,value:string)=>setStages(p=>p.map((s,i)=>i===index?{...s,[key]:value}:s));
@@ -308,6 +308,8 @@ function CreatePage({ account, onWrite }: { account: string | null; onWrite: (me
   if(!/^0x[0-9a-fA-F]{40}$/.test(form.contributor.trim()))throw Error("Enter a valid contributor wallet address.");
   if(!/^[A-Za-z0-9._-]{1,64}$/.test(form.projectId))throw Error("Project ID must be 1–64 letters, numbers, dots, dashes or underscores.");
   if(!form.title.trim()||!form.scope.trim())throw Error("Project title and scope are required.");
+  if(!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$/.test(form.deadlineUtc)||!Number.isFinite(Date.parse(form.deadlineUtc))||Date.parse(form.deadlineUtc)<=Date.now())throw Error("Enter a future deadline using YYYY-MM-DDTHH:MM:SSZ.");
+  if(!/^[0-3]$/.test(form.repairBudget))throw Error("Repair allowance must be between 0 and 3.");
   if(!stages.length||stages.length>32)throw Error("Add between 1 and 32 work packages.");
   const seen=new Set<string>();
   for(const stage of stages){
@@ -328,7 +330,7 @@ function CreatePage({ account, onWrite }: { account: string | null; onWrite: (me
     for(const stage of stages){
       const criteria=JSON.stringify([{criterion_id:"acceptance",requirement:stage.acceptance.trim(),required:true}]);
       const evidence=JSON.stringify([{evidence_id:"deliverable",requirement:"Public verifiable evidence for "+stage.title,required:true}]);
-      const hash=await onWrite("add_milestone",[form.projectId,stage.id,stage.title,stage.definition,criteria,evidence,parseGen(stage.amount),JSON.stringify(stage.dependency?[stage.dependency]:[]),1,"2099-01-01T00:00:00Z"]);
+      const hash=await onWrite("add_milestone",[form.projectId,stage.id,stage.title,stage.definition,criteria,evidence,parseGen(stage.amount),JSON.stringify(stage.dependency?[stage.dependency]:[]),Number(form.repairBudget),form.deadlineUtc]);
       if(!hash)throw Error(`Stopped while adding ${stage.id}. The project already exists; inspect it before trying again.`);
     }
     navigate(`/projects/${encodeURIComponent(form.projectId)}`);
@@ -345,6 +347,7 @@ function CreatePage({ account, onWrite }: { account: string | null; onWrite: (me
            <Field label="Project reference" value={form.projectId} onChange={value=>setForm(p=>({...p,projectId:value}))}/>
            <Field label="Project title" value={form.title} onChange={value=>setForm(p=>({...p,title:value}))}/>
            <Field label="Contributor wallet" value={form.contributor} placeholder="0x…" onChange={value=>setForm(p=>({...p,contributor:value}))}/>
+           <div className="control-create-settings"><Field label="UTC deadline (YYYY-MM-DDTHH:MM:SSZ)" value={form.deadlineUtc} onChange={value=>setForm(p=>({...p,deadlineUtc:value}))}/><label className="field"><span>Repair allowance per stage</span><select value={form.repairBudget} onChange={e=>setForm(p=>({...p,repairBudget:e.target.value}))}>{[0,1,2,3].map(n=><option key={n} value={String(n)}>{n} {n===1?"revision":"revisions"}</option>)}</select></label></div>
            <label className="field"><span>Scope of work</span><textarea rows={3} value={form.scope} onChange={e=>setForm(p=>({...p,scope:e.target.value}))}/></label>
          </div>
        </div>
@@ -365,7 +368,7 @@ function CreatePage({ account, onWrite }: { account: string | null; onWrite: (me
              <Field label="Required acceptance criterion" value={stage.acceptance} onChange={value=>update(i,"acceptance",value)}/>
            </div>
          </section>)}
-         <p className="control-build-help">The contract freezes criteria, graph and tranche values on funding. New plans include one bounded repair. Funding and activation are separate later actions.</p>
+         <p className="control-build-help">The contract freezes criteria, graph and tranche values on funding. The deadline and repair allowance apply to each frozen work package. Funding and activation are separate later actions.</p>
          {message&&<Notice message={message}/>}
          <button className="button button-dark wide" disabled={!account||stages.length===0} onClick={()=>void create()}><LockKeyhole size={15}/> Create project and {stages.length} milestones <ArrowRight size={15}/></button>
          {!account&&<p className="control-evidence-note">Connect a Studio Dev client wallet to create the project.</p>}
