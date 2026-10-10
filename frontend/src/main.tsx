@@ -206,12 +206,27 @@ function ProjectDossier({ project, loading, error, account, tx, onWrite }: { pro
 
 
 
+
 function ControlGantt({ milestones, selected="", onSelect, readOnly=false }: { milestones: Milestone[]; selected?:string; onSelect?:(id:string)=>void;readOnly?:boolean }) {
- const count=Math.max(1,milestones.length);
+ const byId=new Map(milestones.map((m,i)=>[m.milestone_id,{m,i}]));
+ const ancestors=new Set<string>(), descendants=new Set<string>();
+ const visitUp=(id:string)=>{for(const d of byId.get(id)?.m.dependencies||[]){if(!ancestors.has(d)){ancestors.add(d);visitUp(d);}}};
+ const visitDown=(id:string)=>{for(const m of milestones){if((m.dependencies||[]).includes(id)&&!descendants.has(m.milestone_id)){descendants.add(m.milestone_id);visitDown(m.milestone_id);}}};
+ if(selected){visitUp(selected);visitDown(selected);}
+ const colors=(state:string)=>stateTone(state)==="good"?"#078b62":stateTone(state)==="bad"?"#e16642":stateTone(state)==="warn"?"#dda233":"#618ed6";
  return <div className="control-gantt"><div className="control-gantt-head"><span>WORK PACKAGE / PREDECESSOR</span><span>DEPENDENCY-ORDER TRACK</span><span style={{textAlign:"right"}}>TRANCHE</span></div>
+ <svg className="control-dependency-wires" viewBox={`0 0 40 ${milestones.length*77}`} height={milestones.length*77} width="40" aria-hidden="true">
+  {milestones.flatMap((m,i)=>(m.dependencies||[]).map(id=>{
+   const parent=byId.get(id);if(!parent)return null;
+   const sy=38+parent.i*77,ey=38+i*77;
+   return <path key={id+"-"+m.milestone_id} d={`M 9 ${sy} H 22 V ${ey} H 33`} fill="none" stroke={colors(parent.m.state)} strokeWidth={selected&&(selected===m.milestone_id||ancestors.has(m.milestone_id))?2.8:1.9} strokeLinecap="round" strokeLinejoin="round"/>;
+  }))}
+  {milestones.map((m,i)=><circle key={m.milestone_id} cx="9" cy={38+i*77} r="3.8" fill={colors(m.state)} stroke="#fff" strokeWidth="1"/>)}
+ </svg>
  {milestones.map((m,i)=>{
   const deps=m.dependencies||[], blocked=deps.length&&["BLOCKED","LOCKED"].includes(m.state);
-  return <button type="button" key={m.milestone_id} className={`control-gantt-row ${selected===m.milestone_id?"selected":""}`} onClick={()=>onSelect?.(m.milestone_id)} aria-label={`Inspect ${m.title}, ${m.state}`}>
+  const path=ancestors.has(m.milestone_id)?" path-upstream":descendants.has(m.milestone_id)?" path-downstream":"";
+  return <button type="button" key={m.milestone_id} className={`control-gantt-row ${selected===m.milestone_id?"selected":""}${path}`} onClick={()=>onSelect?.(m.milestone_id)} aria-label={`Inspect ${m.title}, ${m.state}`}>
     <div className="control-gantt-name"><span className="control-gantt-ordinal">{String(i+1).padStart(2,"0")}</span><div><strong>{m.title}</strong><small>{deps.length?`AFTER ${deps.join(", ")}`:"ROOT / NO PREDECESSOR"}</small></div></div>
     <div className="control-gantt-track"><span className={`control-gantt-bar ${stateTone(m.state)}`} style={{left:`${Math.min(i*15,65)}%`,width:`${Math.max(18,72-i*8)}%`}}/>{blocked&&<LockKeyhole size={13} className="control-gantt-arrow"/>}</div>
     <div className="control-gantt-amount"><strong>{genAmount(m.tranche)}</strong><ControlState state={m.state}/></div>
