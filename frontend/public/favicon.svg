@@ -1,9 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MilestoneVault">
-  <rect width="64" height="64" rx="14" fill="#175bdc"/>
-  <path d="M18 18v29h27" fill="none" stroke="#8fc8ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M18 31h14v-13h13" fill="none" stroke="#e7f5ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <rect x="12" y="11" width="12" height="12" rx="3" fill="#fff"/>
-  <rect x="39" y="11" width="12" height="12" rx="3" fill="#e7f5ff"/>
-  <rect x="25" y="25" width="13" height="13" rx="3" fill="#fff"/>
-  <rect x="39" y="41" width="12" height="12" rx="3" fill="#7ee3c4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="milestonevault">
+<rect width="64" height="64" fill="#151513"/>
+<path d="M11 46V23h7v3c2-3 4-4 8-4 5 0 7 2 8 5 2-3 5-5 9-5 7 0 10 5 10 12v12h-8V35c0-4-1-6-5-6-3 0-5 2-5 6v11h-8V35c0-4-1-6-5-6-3 0-5 2-5 6v11z" fill="#f7f6f1"/>
+<circle cx="54" cy="50" r="5" fill="#f05239"/>
 </svg>
