@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MilestoneVault">
+  <rect width="64" height="64" rx="14" fill="#175bdc"/>
+  <path d="M18 18v29h27" fill="none" stroke="#8fc8ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18 31h14v-13h13" fill="none" stroke="#e7f5ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="12" y="11" width="12" height="12" rx="3" fill="#fff"/>
+  <rect x="39" y="11" width="12" height="12" rx="3" fill="#e7f5ff"/>
+  <rect x="25" y="25" width="13" height="13" rx="3" fill="#fff"/>
+  <rect x="39" y="41" width="12" height="12" rx="3" fill="#7ee3c4"/>
+</svg>
