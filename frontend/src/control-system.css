@@ -365,3 +365,18 @@ h1 em,h2 em{font-family:inherit;color:inherit;font-style:normal}
 @media(max-width:520px){
  .control-create-settings{grid-template-columns:1fr}
 }
+
+/* Dependency wiring connects actual stored predecessor IDs, never inferred visual adjacency */
+.control-gantt-head,.control-gantt-row{padding-left:55px}
+.control-dependency-wires{position:absolute;left:9px;top:43px;z-index:5;pointer-events:none;overflow:visible}
+.control-gantt-row.path-upstream{background:#f4f9ff}
+.control-gantt-row.path-downstream{background:#fff8f4}
+.control-gantt-row.path-upstream .control-gantt-ordinal{border-color:#a5c6f6;color:#195ccf}
+.control-gantt-row.path-downstream .control-gantt-ordinal{border-color:#e6a98f;color:#be4c2a}
+@media(max-width:520px){
+ .control-dependency-wires{display:none}
+ .control-gantt-row{padding-left:15px}
+ .control-gantt-row:has(.control-gantt-name) .control-gantt-ordinal{border-left:3px solid #a8bfdb}
+ .control-gantt-row.path-upstream .control-gantt-ordinal{border-left-color:#175bdc}
+ .control-gantt-row.path-downstream .control-gantt-ordinal{border-left-color:#e16642}
+}
